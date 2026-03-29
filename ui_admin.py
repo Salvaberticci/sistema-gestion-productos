@@ -226,6 +226,7 @@ class AdminScreen(ctk.CTkFrame):
         ctk.CTkLabel(self.sidebar, text="ADMIN PANEL", font=("Inter", 20, "bold"), text_color=COLOR_ACCENT).pack(pady=40)
         self.create_side_btn("📦 Inventario", self.show_products_tab).pack(pady=5, padx=20, fill="x")
         self.create_side_btn("📊 Estadísticas", self.show_stats_tab).pack(pady=5, padx=20, fill="x")
+        self.create_side_btn("📖 Guía de Uso", self.show_guide_tab).pack(pady=5, padx=20, fill="x")
         self.create_side_btn("⚙️ Configuración", self.show_config_tab).pack(pady=5, padx=20, fill="x")
         self.create_side_btn("📁 Base de Datos", self.show_data_tab).pack(pady=20, padx=20, fill="x")
         ctk.CTkButton(self.sidebar, text="Cerrar Sesión", fg_color="transparent", text_color="#F85149", command=self.setup_login_ui).pack(side="bottom", pady=30)
@@ -610,6 +611,75 @@ class AdminScreen(ctk.CTkFrame):
                 
                 # Badge de "Interés"
                 ctk.CTkLabel(item, text="INTERÉS ALTO", font=("Inter", 10, "bold"), fg_color="#238636", text_color="white", corner_radius=10, width=100, height=25).pack(side="right", padx=20)
+
+    def show_guide_tab(self):
+        for widget in self.content_area.winfo_children(): widget.destroy()
+        ctk.CTkLabel(self.content_area, text="Manual Maestro del Sistema", font=("Inter", 32, "bold")).pack(anchor="w", pady=(0, 40))
+        
+        container = ctk.CTkScrollableFrame(self.content_area, fg_color="transparent")
+        container.pack(fill="both", expand=True)
+        
+        def create_guide_section(title, text, icon):
+            card = ctk.CTkFrame(container)
+            SharedStyles.apply_card_style(card)
+            card.pack(fill="x", pady=15, padx=5)
+            
+            header = ctk.CTkFrame(card, fg_color="transparent")
+            header.pack(fill="x", padx=25, pady=(25, 10))
+            ctk.CTkLabel(header, text=icon, font=("Inter", 28)).pack(side="left")
+            ctk.CTkLabel(header, text=title, font=("Inter", 20, "bold"), text_color=COLOR_ACCENT).pack(side="left", padx=15)
+            
+            ctk.CTkLabel(card, text=text, font=("Inter", 13.5), text_color=COLOR_TEXT_MAIN, justify="left", wraplength=780).pack(padx=25, pady=(0, 30), anchor="w")
+
+        # --- SECCIONES DETALLADAS DE LA GUÍA ---
+        create_guide_section(
+            "1. Terminal de Consulta y Experiencia del Cliente",
+            "Esta es la interfaz 'Inmersiva' diseñada para el autoservicio del cliente. Su objetivo es la velocidad y el impacto visual.\n\n"
+            "• Lógica de Búsqueda Dual: El buscador identifica automáticamente si se ha ingresado un código de barras (numérico) o un nombre (texto). Se recomienda usar el escáner para una precisión del 100%.\n"
+            "• Temporizador de Privacidad: Para evitar que la información de un producto quede expuesta, el sistema cuenta con un 'Auto-Reset' de 15 segundos. Si no hay interacción, la pantalla se limpia y regresa al carrusel.\n"
+            "• Carrusel Infinito: Las tarjetas inferiores rotan en bucle para mostrar el catálogo disponible. Al hacer clic en ellas, se despliega el producto en pantalla completa.\n"
+            "• Fondo Animado 'Drift': Diseñado para ser estético pero ligero; no consume recursos excesivos del procesador mientras espera la interacción del cliente.",
+            "🔍"
+        )
+
+        create_guide_section(
+            "2. Gestión de Inventario Profesional",
+            "El administrador tiene control total sobre los activos del negocio mediante una interfaz de tabla dinámica.\n\n"
+            "• Flujo de Edición: Para modificar un producto, localízalo en la tabla y haz DOBLE CLIC sobre su fila. Se abrirá una ventana emergente donde podrás editar todo, incluyendo la imagen.\n"
+            "• Gestión Automatizada de Imágenes: El sistema renombra internamente las fotos usando el código del producto (ej: 12345.png). Esto asegura que no haya enlaces rotos si mueves la carpeta.\n"
+            "• Borrado Físico (Limpieza de Disco): A diferencia de otros sistemas, cuando eliminas un producto o su imagen en 'El Rebusque', el archivo real se borra de tu computadora. Esto evita acumular gigabytes de fotos 'basura' de productos que ya no vendes.\n"
+            "• Búsqueda de Admin: Capaz de filtrar miles de productos en milisegundos por código o palabras clave en la referencia.",
+            "📦"
+        )
+
+        create_guide_section(
+            "3. Inteligencia de Negocio y Estadísticas",
+            "El sistema rastrea el comportamiento del cliente para ayudarte a tomar decisiones de compra.\n\n"
+            "• Tracking de Interés: El sistema cuenta cuántas veces se ha consultado cada producto. El ranking 'Top 5' te indica qué productos son los que más curiosidad despiertan, incluso si no se han vendido aún.\n"
+            "• Zona Crítica (Stock Bajo): Muestra automáticamente los productos que tienen existencia pero están próximos a agotarse. Ideal para planificar el siguiente pedido al proveedor.\n"
+            "• Análisis de Precios: Identifica rápidamente tus productos de mayor valor (Lujo) y de menor costo (Rotación rápida).",
+            "📊"
+        )
+
+        create_guide_section(
+            "4. Gestión de Datos y Flujo de Carga Masiva",
+            "Esta es la sección más potente para el manejo de grandes volúmenes de información.\n\n"
+            "• AGREGAR PRODUCTOS NUEVOS: El flujo correcto para ingresar mercancía nueva es:\n"
+            "   1. Haz clic en 'Exportar Plantilla Vacía'.\n"
+            "   2. Llena los datos en el Excel (solo Código, Referencia, Existencia y Precio).\n"
+            "   3. Sube el archivo con 'Actualizar Datos (Excel)'.\n"
+            "• Smart Import: Esta función fusiona los datos del Excel con la base de datos local. Si el producto ya existe, actualiza su precio y stock pero PROTEGE la imagen que ya habías asignado manualmente.\n"
+            "• Respaldo Completo: Genera una carpeta con la fecha y hora actual que contiene una copia exacta de tu inventario y todas tus fotografías. Úsalo siempre antes de realizar cambios masivos.",
+            "📁"
+        )
+
+        create_guide_section(
+            "5. Seguridad y Estabilidad",
+            "Controles críticos para la integridad del sistema.\n\n"
+            "• Tasa de Cambio Global: Al actualizar este valor, todos los precios en Bolívares de la pantalla de cliente se recalculan instantáneamente. No necesitas editar cada producto uno por uno.\n"
+            "• Protección de Acceso: El Panel Admin está protegido. Al cambiar la contraseña, el sistema exige la clave actual por seguridad. Una vez cambiada, la sesión anterior sigue siendo válida hasta que se cierre.",
+            "⚙️"
+        )
 
     def show_data_tab(self):
         for widget in self.content_area.winfo_children(): widget.destroy()
