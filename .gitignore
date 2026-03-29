@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.pytest_cache/
+.vscode/
+.idea/
+*.log
+# Opcional: Desactivado para permitir una base de datos de ejemplo en el repo inicial
+# el_rebusque.db
+# images/products/

@@ -1,0 +1,6 @@
+customtkinter
+pandas
+Pillow
+openpyxl
+sqlite3
+# sqlite3 is usually built-in, but listed for clarity
