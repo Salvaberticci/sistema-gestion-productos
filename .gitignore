@@ -6,6 +6,9 @@ __pycache__/
 .vscode/
 .idea/
 *.log
-# Opcional: Desactivado para permitir una base de datos de ejemplo en el repo inicial
-# el_rebusque.db
-# images/products/
+# Artefactos de PyInstaller (archivos de compilación locales)
+build/
+dist/
+*.spec
+El_Rebusque_Portable_v1.0/
+El_Rebusque_Portable_v1.0.zip
