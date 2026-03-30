@@ -1,9 +1,11 @@
 import customtkinter as ctk
+import winsound
 import os
 from PIL import Image
 from database import get_db_connection
-from utils import get_exchange_rate
+from utils import get_exchange_rate, get_installed_printers, print_thermal_ticket
 import tkinter as tk
+from utils import calculate_prices, format_currency
 from tkinter import filedialog, messagebox, ttk
 import sqlite3
 import pandas as pd
@@ -225,6 +227,7 @@ class AdminScreen(ctk.CTkFrame):
         self.sidebar.grid(row=0, column=0, sticky="nsew")
         ctk.CTkLabel(self.sidebar, text="ADMIN PANEL", font=("Inter", 20, "bold"), text_color=COLOR_ACCENT).pack(pady=40)
         self.create_side_btn("📦 Inventario", self.show_products_tab).pack(pady=5, padx=20, fill="x")
+        self.create_side_btn("🖨️ Impresión", self.show_print_tab).pack(pady=5, padx=20, fill="x")
         self.create_side_btn("📊 Estadísticas", self.show_stats_tab).pack(pady=5, padx=20, fill="x")
         self.create_side_btn("📖 Guía de Uso", self.show_guide_tab).pack(pady=5, padx=20, fill="x")
         self.create_side_btn("⚙️ Configuración", self.show_config_tab).pack(pady=5, padx=20, fill="x")
@@ -611,6 +614,118 @@ class AdminScreen(ctk.CTkFrame):
                 
                 # Badge de "Interés"
                 ctk.CTkLabel(item, text="INTERÉS ALTO", font=("Inter", 10, "bold"), fg_color="#238636", text_color="white", corner_radius=10, width=100, height=25).pack(side="right", padx=20)
+
+    def show_print_tab(self):
+        for widget in self.content_area.winfo_children(): widget.destroy()
+        ctk.CTkLabel(self.content_area, text="Impresión de Tickets", font=("Inter", 32, "bold")).pack(anchor="w", pady=(0, 40))
+        
+        container = ctk.CTkFrame(self.content_area, fg_color="transparent")
+        container.pack(fill="both", expand=True)
+
+        left_col = ctk.CTkFrame(container, fg_color="transparent")
+        left_col.pack(side="left", fill="both", expand=True, padx=(0, 20))
+        
+        # Tarjeta de Conexión de Impresora
+        printer_card = ctk.CTkFrame(left_col)
+        SharedStyles.apply_card_style(printer_card)
+        printer_card.pack(fill="x", pady=(0, 20))
+        
+        ctk.CTkLabel(printer_card, text="Impresora Térmica", font=("Inter", 16, "bold"), text_color=COLOR_ACCENT).pack(pady=(20, 5))
+        
+        printers = get_installed_printers()
+        if not printers:
+            ctk.CTkLabel(printer_card, text="⚠️ No se detectaron impresoras instaladas en Windows.", text_color="#F85149", font=("Inter", 13)).pack(pady=10)
+            self.printer_var = ctk.StringVar(value="Ninguna")
+            self.printer_selector = ctk.CTkOptionMenu(printer_card, values=["Ninguna"], variable=self.printer_var, state="disabled", fg_color="#30363D")
+            self.printer_selector.pack(pady=10)
+        else:
+            ctk.CTkLabel(printer_card, text="Selecciona el dispositivo de impresión:", text_color=COLOR_TEXT_DIM).pack(pady=5)
+            self.printer_var = ctk.StringVar(value=printers[0])
+            self.printer_selector = ctk.CTkOptionMenu(printer_card, values=printers, variable=self.printer_var, width=300)
+            self.printer_selector.pack(pady=15)
+
+        # Tarjeta de Búsqueda
+        search_card = ctk.CTkFrame(left_col)
+        SharedStyles.apply_card_style(search_card)
+        search_card.pack(fill="both", expand=True)
+        
+        ctk.CTkLabel(search_card, text="Buscador de Producto", font=("Inter", 16, "bold"), text_color=COLOR_ACCENT).pack(pady=(20, 10))
+        
+        search_frame = ctk.CTkFrame(search_card, fg_color="transparent")
+        search_frame.pack(fill="x", padx=30, pady=10)
+        
+        self.ticket_search = ctk.CTkEntry(search_frame, width=300, height=45, placeholder_text="Escanea o escribe el código/nombre...", fg_color="#0D1117")
+        self.ticket_search.pack(side="left", padx=(0, 10))
+        
+        btn_search = ctk.CTkButton(search_frame, text="🔍 Buscar", height=45, cursor="hand2", command=self.handle_print_search)
+        btn_search.pack(side="left")
+        self.ticket_search.bind("<Return>", lambda e: self.handle_print_search())
+
+        # Columna Derecha: Vista Previa y Botón
+        right_col = ctk.CTkFrame(container, fg_color="transparent", width=400)
+        right_col.pack(side="right", fill="both", expand=True)
+
+        self.ticket_preview = ctk.CTkFrame(right_col)
+        SharedStyles.apply_card_style(self.ticket_preview)
+        self.ticket_preview.pack(fill="both", expand=True)
+        
+        ctk.CTkLabel(self.ticket_preview, text="🏷️ Vista Previa del Ticket", font=("Inter", 18, "bold")).pack(pady=(30, 10))
+        
+        self.ticket_name_lbl = ctk.CTkLabel(self.ticket_preview, text="---", font=("Inter", 15), wraplength=300)
+        self.ticket_name_lbl.pack(pady=10)
+        
+        self.ticket_price_lbl = ctk.CTkLabel(self.ticket_preview, text="Bs. 0.00", font=("Inter", 32, "bold"), text_color=COLOR_GOLD)
+        self.ticket_price_lbl.pack(pady=20)
+        
+        self.print_btn = ctk.CTkButton(self.ticket_preview, text="🖨️ Imprimir Ticket", height=60, font=("Inter", 16, "bold"), state="disabled", text_color_disabled="white", cursor="hand2", command=self.handle_print_action)
+        SharedStyles.apply_accent_button(self.print_btn)
+        self.print_btn.pack(pady=40, padx=50, fill="x")
+        
+        self.current_ticket_product = None
+        self.current_ticket_price = 0.0
+
+    def handle_print_search(self):
+        query = self.ticket_search.get().strip()
+        if not query: return
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT referencia, pventa FROM productos WHERE codigop = ? OR referencia LIKE ?", (query, f"%{query}%"))
+        row = cursor.fetchone()
+        conn.close()
+        
+        if row:
+            winsound.Beep(800, 150) # Sonido de éxito al encontrar producto
+            rate = get_exchange_rate()
+            ves_price = row['pventa'] * rate if row['pventa'] else 0.0
+            self.current_ticket_product = row['referencia']
+            self.current_ticket_price = ves_price
+            
+            self.ticket_name_lbl.configure(text=self.current_ticket_product)
+            self.ticket_price_lbl.configure(text=f"Bs. {self.current_ticket_price:,.2f}")
+            
+            if self.printer_var.get() != "Ninguna":
+                self.print_btn.configure(state="normal")
+        else:
+            winsound.Beep(400, 400) # Sonido de error
+            self.ticket_name_lbl.configure(text="❌ Producto no encontrado")
+            self.ticket_price_lbl.configure(text="---")
+            self.print_btn.configure(state="disabled")
+            self.current_ticket_product = None
+
+    def handle_print_action(self):
+        if not self.current_ticket_product: return
+        
+        printer = self.printer_var.get()
+        if printer == "Ninguna": return
+        
+        success, msg = print_thermal_ticket(printer, self.current_ticket_product, self.current_ticket_price)
+        if success:
+            winsound.Beep(800, 150) # Sonido de éxito al imprimir
+            messagebox.showinfo("Impresión Exitosa", msg)
+        else:
+            winsound.Beep(400, 400) # Sonido de error
+            messagebox.showerror("Error de Impresión", msg)
 
     def show_guide_tab(self):
         for widget in self.content_area.winfo_children(): widget.destroy()
