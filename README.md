@@ -3,7 +3,7 @@
 Sistema moderno de consulta de precios y gestión administrativa diseñado específicamente para facilitar el control de inventarios locales con una experiencia de usuario rápida y profesional.
 
 <div align="center">
-  <a href="https://github.com/Salvaberticci/sistema-gestion-productos/releases/latest">
+  <a href="https://github.com/Salvaberticci/sistema-gestion-productos/releases/download/v1.0/El_Rebusque_Portable_v1.0.zip">
     <img src="https://img.shields.io/badge/⬇️_Descargar_Versión_Portable-(64--bits)-0B0E14?style=for-the-badge&logo=windows&logoColor=58A6FF&color=58A6FF&labelColor=161B22" alt="Descargar Portable" />
   </a>
 </div>
