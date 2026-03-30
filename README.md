@@ -3,16 +3,16 @@
 Sistema moderno de consulta de precios y gestión administrativa diseñado específicamente para facilitar el control de inventarios locales con una experiencia de usuario rápida y profesional.
 
 <div align="center">
-  <a href="https://github.com/Salvaberticci/sistema-gestion-productos/releases/download/v1.0/El_Rebusque_Portable_v1.0.zip">
-    <img src="https://img.shields.io/badge/⬇️_Descargar_Versión_Portable-(64--bits)-0B0E14?style=for-the-badge&logo=windows&logoColor=58A6FF&color=58A6FF&labelColor=161B22" alt="Descargar Portable" />
+  <a href="https://github.com/Salvaberticci/sistema-gestion-productos/releases/download/v1.1/El_Rebusque_Portable_v1.1.zip">
+    <img src="https://img.shields.io/badge/⬇️_Descargar_Versión_Portable_(v1.1)-0B0E14?style=for-the-badge&logo=windows&logoColor=58A6FF&color=58A6FF&labelColor=161B22" alt="Descargar Portable" />
   </a>
 </div>
 
-## 🛠️ Guía Rápida de Uso (Portable)
+## 🛠️ Guía Rápida de Uso (Portable v1.1)
 1. Descarga el archivo `.zip` usando el botón de arriba.
-2. Descomprime la carpeta `El_Rebusque_Portable_v1.0` en tu computadora o pendrive.
-3. Asegúrate de nunca borrar la carpeta `images/` ni el archivo `logo.png` que acompañan al ejecutable.
-4. Haz doble clic en `Sistema_El_Rebusque.exe`. (La base de datos se creará sola en el primer inicio).
+2. Descomprime la carpeta `El_Rebusque_Portable_v1.1` en tu computadora o pendrive.
+3. Abre la carpeta y ejecuta `Sistema_El_Rebusque.exe` (verás el ícono azul).
+4. **IMPORTANTE**: No muevas el `.exe` fuera de su carpeta, ya que necesita tener cerca la base de datos, el Excel y las imágenes para que veas toda tu información al instante.
 
 ## ✨ Características Principales
 
