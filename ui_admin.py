@@ -677,9 +677,15 @@ class AdminScreen(ctk.CTkFrame):
         self.ticket_price_lbl = ctk.CTkLabel(self.ticket_preview, text="Bs. 0.00", font=("Inter", 32, "bold"), text_color=COLOR_GOLD)
         self.ticket_price_lbl.pack(pady=20)
         
-        self.print_btn = ctk.CTkButton(self.ticket_preview, text="🖨️ Imprimir Ticket", height=60, font=("Inter", 16, "bold"), state="disabled", text_color_disabled="white", cursor="hand2", command=self.handle_print_action)
+        buttons_frame = ctk.CTkFrame(self.ticket_preview, fg_color="transparent")
+        buttons_frame.pack(pady=40, padx=50, fill="x")
+        
+        self.preview_btn = ctk.CTkButton(buttons_frame, text="👁️ Vista Previa (PDF)", height=60, font=("Inter", 16, "bold"), state="disabled", fg_color="#21262D", hover_color="#30363D", cursor="hand2", command=self.handle_preview_action)
+        self.preview_btn.pack(side="top", fill="x", pady=(0, 10))
+        
+        self.print_btn = ctk.CTkButton(buttons_frame, text="🖨️ Imprimir Ticket", height=60, font=("Inter", 16, "bold"), state="disabled", text_color_disabled="white", cursor="hand2", command=self.handle_print_action)
         SharedStyles.apply_accent_button(self.print_btn)
-        self.print_btn.pack(pady=40, padx=50, fill="x")
+        self.print_btn.pack(side="top", fill="x")
         
         self.current_ticket_product = None
         self.current_ticket_price = 0.0
@@ -706,11 +712,13 @@ class AdminScreen(ctk.CTkFrame):
             
             if self.printer_var.get() != "Ninguna":
                 self.print_btn.configure(state="normal")
+            self.preview_btn.configure(state="normal")
         else:
             winsound.Beep(400, 400) # Sonido de error
             self.ticket_name_lbl.configure(text="❌ Producto no encontrado")
             self.ticket_price_lbl.configure(text="---")
             self.print_btn.configure(state="disabled")
+            self.preview_btn.configure(state="disabled")
             self.current_ticket_product = None
 
     def handle_print_action(self):
@@ -726,6 +734,16 @@ class AdminScreen(ctk.CTkFrame):
         else:
             winsound.Beep(400, 400) # Sonido de error
             messagebox.showerror("Error de Impresión", msg)
+
+    def handle_preview_action(self):
+        if not self.current_ticket_product: return
+        
+        success, msg = generate_ticket_pdf(self.current_ticket_product, self.current_ticket_price)
+        if success:
+            winsound.Beep(800, 150) # Sonido de éxito
+        else:
+            winsound.Beep(400, 400) # Sonido de error
+            messagebox.showerror("Error de Vista Previa", msg)
 
     def show_guide_tab(self):
         for widget in self.content_area.winfo_children(): widget.destroy()
