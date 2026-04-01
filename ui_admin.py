@@ -3,7 +3,7 @@ import winsound
 import os
 from PIL import Image
 from database import get_db_connection
-from utils import get_exchange_rate, get_installed_printers, print_thermal_ticket
+from utils import get_exchange_rate, get_installed_printers, print_thermal_ticket, generate_ticket_pdf
 import tkinter as tk
 from utils import calculate_prices, format_currency
 from tkinter import filedialog, messagebox, ttk

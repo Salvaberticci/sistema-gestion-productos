@@ -1,5 +1,7 @@
 from database import get_db_connection
 import sys
+import os
+from fpdf import FPDF
 
 # Soporte de impresión nativa en Windows (requiere pywin32 instalado)
 try:
@@ -121,3 +123,44 @@ def print_thermal_ticket(printer_name, product_name, price_bs):
         return False, f"Error durante la impresión:\n{e}"
     finally:
         win32print.ClosePrinter(hPrinter)
+
+def generate_ticket_pdf(product_name, price_bs, output_path="vista_previa_ticket.pdf"):
+    """
+    Genera un archivo PDF con el formato exacto de un ticket térmico de 57mm x 80mm.
+    Se utiliza para previsualizar antes de imprimir físicamente.
+    """
+    try:
+        # Definir tamaño de página: 57mm de ancho por 80mm de alto (formato ticket)
+        pdf = FPDF(unit="mm", format=(57, 80))
+        pdf.add_page()
+        pdf.set_margins(left=5, top=5, right=5)
+        
+        # Algoritmo de escalado de fuente para el NOMBRE (similar al de GDI)
+        font_size = 14
+        pdf.set_font("Helvetica", "B", font_size)
+        
+        # Reducir tamaño de fuente si el texto es muy largo para el ancho de 57mm
+        while pdf.get_string_width(product_name) > 47 and font_size > 7:
+            font_size -= 0.5
+            pdf.set_font("Helvetica", "B", font_size)
+            
+        pdf.set_y(8)
+        # Usamos multi_cell para permitir que el nombre ocupe hasta 2 líneas si es necesario
+        pdf.multi_cell(w=47, h=5, text=product_name, align='L')
+        
+        # Dibujar el PRECIO
+        pdf.set_y(pdf.get_y() + 4)
+        pdf.set_font("Helvetica", "B", 18)
+        formated_price = format_currency(price_bs, "Bs.")
+        pdf.cell(w=47, h=10, text=formated_price, align='L')
+        
+        # Guardar archivo
+        pdf.output(output_path)
+        
+        # Abrir el PDF automáticamente en Windows
+        if os.name == 'nt' and os.path.exists(output_path):
+            os.startfile(output_path)
+            
+        return True, f"Vista previa generada en: {output_path}"
+    except Exception as e:
+        return False, f"Error al generar vista previa PDF: {e}"
