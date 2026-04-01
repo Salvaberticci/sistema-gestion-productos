@@ -10,5 +10,6 @@ __pycache__/
 build/
 dist/
 *.spec
-El_Rebusque_Portable_v1.0/
-El_Rebusque_Portable_v1.0.zip
+logo.ico
+El_Rebusque_Portable_v*/
+El_Rebusque_Portable_v*.zip
