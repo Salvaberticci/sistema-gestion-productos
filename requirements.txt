@@ -1,0 +1,8 @@
+customtkinter
+pandas
+Pillow
+openpyxl
+sqlite3
+pywin32
+# sqlite3 is usually built-in, but listed for clarity
+fpdf2

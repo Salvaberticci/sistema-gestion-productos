@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.pytest_cache/
+.vscode/
+.idea/
+*.log
+# Artefactos de PyInstaller (archivos de compilación locales)
+build/
+dist/
+*.spec
+logo.ico
+El_Rebusque_Portable_v*/
+El_Rebusque_Portable_v*.zip
+El_Rebusque_Maestro_v*/
+El_Rebusque_Maestro_v*.zip
