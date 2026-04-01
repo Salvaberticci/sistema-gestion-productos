@@ -74,28 +74,42 @@ def print_thermal_ticket(printer_name, product_name, price_bs):
         hDC.StartDoc("Ticket_Precio")
         hDC.StartPage()
         
-        # Opciones de fuente para el NOMBRE (Arial, tamaño normal-grande)
-        font_name = win32ui.CreateFont({
-            "name": "Arial",
-            "height": 45, # Tamaño fuente
-            "weight": 700, # Negrita
-        })
-        hDC.SelectObject(font_name)
+        # Configuración de ancho máximo para papel de 57mm (aprox. 400-430 unidades lógicas)
+        MAX_TEXT_WIDTH = 420 
         
-        # Dibujar el Nombre con un margen de 10px X, 10px Y (se recorta si es muy largo para evitar salto de línea errático)
-        display_name = product_name[:35] + ("..." if len(product_name) > 35 else "")
-        hDC.TextOut(10, 20, display_name)
+        # Algoritmo de ESCALADO DINÁMICO para el NOMBRE
+        current_height = 55 # Empezamos con un tamaño generoso
+        min_height = 20    # Tamaño mínimo legible
         
-        # Opciones de fuente para el PRECIO (Arial, más grande)
+        while current_height >= min_height:
+            font_name = win32ui.CreateFont({
+                "name": "Arial",
+                "height": current_height,
+                "weight": 700, # Negrita
+            })
+            hDC.SelectObject(font_name)
+            # Medir cuánto ocupa el nombre con este tamaño de fuente
+            text_width, text_height = hDC.GetTextExtent(product_name)
+            
+            if text_width <= MAX_TEXT_WIDTH or current_height == min_height:
+                break
+            
+            current_height -= 5 # Reducir y volver a probar
+            
+        # Dibujar el Nombre (centrado o con margen izquierdo de 10px)
+        hDC.TextOut(10, 20, product_name)
+        
+        # Opciones de fuente para el PRECIO (Arial, siempre grande y claro)
+        price_height = 70
         font_price = win32ui.CreateFont({
             "name": "Arial",
-            "height": 65, 
-            "weight": 700,
+            "height": price_height, 
+            "weight": 800, # Extra negrita
         })
         hDC.SelectObject(font_price)
         
         formated_price = format_currency(price_bs, "Bs.")
-        hDC.TextOut(10, 80, formated_price)
+        hDC.TextOut(10, 25 + text_height + 10, formated_price)
         
         # Cerrar y enviar job
         hDC.EndPage()
